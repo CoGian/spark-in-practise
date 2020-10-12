@@ -30,7 +30,20 @@ def main():
 	assert hashtag_mentions.count() == 5262
 	assert hashtag_mentions.where(col('col') == '#youtube').count() == 2
 
+	# Count how many times each hashtag is mentioned
+	hashtag_mentions_count = hashtag_mentions.groupBy('col').count()
+	hashtag_mentions_count.cache()
+	assert hashtag_mentions_count.count() == 2461
+	assert hashtag_mentions_count.where(col('col') == '#youtube').count() == 1
+	assert hashtag_mentions_count.where(col('col') == '#youtube').collect()[0].asDict()['count'] == 2
 
-# print('SUCCESS')
+	# Find the 10 most popular Hashtags by descending order
+	top10 = hashtag_mentions_count.sort('count', ascending=False).take(10)
+	assert top10[0].asDict()['count'] == 253
+	assert top10[0].asDict()['col'] == '#DME'
+
+	print('SUCCESS')
+
+
 if __name__ == '__main__':
 	main()
